@@ -1,1 +1,5 @@
-# DjangoShop 2017年7月22日
+# DjangoShop
+
+提交生鲜项目
+
+提交App Store
