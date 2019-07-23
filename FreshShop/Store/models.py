@@ -21,11 +21,13 @@ class Store(models.Model):
     type = models.ManyToManyField(to=StoreType,verbose_name="店铺类型")
 class Goods(models.Model):
     goods_name = models.CharField(max_length=32,verbose_name="商品名称")
-    good_price = models.FloatField(verbose_name="商品价格")
-    good_image = models.ImageField(upload_to="store/images",verbose_name="商品图片")
+    goods_price = models.FloatField(verbose_name="商品价格")
+    goods_image = models.ImageField(upload_to="store/images",verbose_name="商品图片")
     goods_number = models.IntegerField(verbose_name="商品库存")
-    goods_description = models.DateField(verbose_name="出厂日期")
+    goods_description = models.TextField(verbose_name="商品描述")
+    goods_date = models.DateField(verbose_name="出厂日期")
     goods_safeDate = models.IntegerField(verbose_name="保质期")
+    store_id = models.ManyToManyField(to=Store,verbose_name="商品店铺")
 class GoodImg(models.Model):
     img_address = models.ImageField(upload_to="store/images",verbose_name="图片地址")
     img_description = models.TextField(max_length=32,verbose_name="图片描述")
