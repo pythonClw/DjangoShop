@@ -21,7 +21,7 @@
         <tbody>
             {% for goods in page %}
                 <tr>
-                    <td>{{ goods.goods_name }}</td>
+                    <td><a href="/Store/goods/{{ goods.id }}">{{ goods.goods_name }}</a></td>
                     <td>
                         <input type="text" value="{{ goods.goods_price }}">
                     </td>
@@ -29,8 +29,12 @@
                     <td>{{ goods.goods_date }}</td>
                     <td>{{ goods.goods_safeDate }}</td>
                     <td>
-                        <a class="btn btn-danger" href="#">下架</a>
-                        <a class="btn btn-primary" href="#">销毁</a>
+                        {% ifequal state "up" %}
+                        <a class="btn btn-danger" href="/Store/set_goods/down/?id={{ goods.id }}">下架</a>
+                        {% else %}
+                        <a class="btn btn-danger" href="/Store/set_goods/up/?id={{ goods.id }}">上架</a>
+                        {% endifequal %}
+                        <a class="btn btn-primary" href="/Store/set_goods/del/?id={{ goods.id }}">销毁</a>
                     </td>
                 </tr>
             {% endfor %}

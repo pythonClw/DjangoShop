@@ -51,6 +51,11 @@ def login(request):
                     response.set_cookie("username",username)
                     response.set_cookie("user_id",user.id)
                     request.session["username"] = username
+                    store = Store.objects.filter(user_id=user.id).first()
+                    if store:
+                        response.set_cookie("has_store",store.id)
+                    else:
+                        response.set_cookie("has_store","")
                     return response
                 else:
                     result["content"] = "密码输入有误"
@@ -59,14 +64,12 @@ def login(request):
         else:
             result["content"] = "用户名或者密码不可为空"
     return render(request,'store/login.html',locals())
-
-
-
 def login_valid(fun):
     def inner(request,*args,**kwargs):
         username = request.COOKIES.get("username")
         session_user = request.session.get("username")
-        if username and session_user:
+        user_id = request.COOKIES.get("user_id")
+        if username and session_user and user_id:
             user = Seller.objects.filter(username=username).first()
             if user and username == session_user:
                 return fun(request,*args,**kwargs)
@@ -74,19 +77,20 @@ def login_valid(fun):
     return inner
 @login_valid
 def index(request):
-    user_id = request.COOKIES.get("user_id")
-    if user_id:
-        user_id = int(user_id)
-    else:
-        user_id = 0
-    store = Store.objects.filter(user_id=user_id).first()
-    if store:
-        is_store = 1
-    else:
-        is_store = 0
-    return render(request,"store/index.html",{"is_store":is_store})
+    # user_id = request.COOKIES.get("user_id")
+    # if user_id:
+    # user_id = int(user_id)
+    # else:
+    #     user_id = 0
+    # store = Store.objects.filter(user_id=user_id).first()
+    # if store:
+    #     is_store = 1
+    # else:
+    #     is_store = 0
+    return render(request,"store/index.html")
 def base(request):
     return render(request,"store/base.html")
+@login_valid
 def register_store(request):
     type_list = StoreType.objects.all()
     if request.method =="POST":
@@ -115,8 +119,11 @@ def register_store(request):
             store_type = StoreType.objects.get(id=i)  # 查询类型数据
             store.type.add(store_type)  # 添加到类型字段，多对多的映射表
         store.save()
-
+        response = HttpResponseRedirect("/Store/index/")
+        response.set_cookie('has_store',store.id)
+        return response
     return render(request, "store/register_store.html", locals())
+@login_valid
 def add_goods(request):
     if request.method == "POST":
         goods_name = request.POST.get("goods_name")
@@ -126,7 +133,7 @@ def add_goods(request):
         goods_date = request.POST.get("goods_date")
         goods_image = request.FILES.get("goods_image")
         goods_safeDate = request.POST.get("goods_safeDate")
-        goods_store = request.POST.get("goods_store")
+        goods_store = request.COOKIES.get("has_store")
         goods = Goods()
         goods.goods_name = goods_name
         goods.goods_description = goods_description
@@ -142,17 +149,69 @@ def add_goods(request):
         goods.save()
         return HttpResponseRedirect("/Store/list_goods/")
     return render(request,"store/add_goods.html")
-def list_goods(request):
+@login_valid
+def list_goods(request,state):
+    if state =="up":
+        state_num = 1
+    else:
+        state_num = 0
     keywords = request.GET.get("keywords","")
     page_num = request.GET.get("page_num",1)
+    store_id = request.COOKIES.get("has_store")
+    store = Store.objects.get(id=int(store_id))
     if keywords:
-        goods_list = Goods.objects.filter(goods_name__contains=keywords)
+        goods_list = store.goods_set.filter(goods_name__contains=keywords,goods_under=state_num)
     else:
-        goods_list = Goods.objects.all()
+        goods_list = store.goods_set.filter(goods_under=state_num)
     paginator = Paginator(goods_list,5)
     page = paginator.page(int(page_num))
     page_range = paginator.page_range
     return render(request,"store/list_goods.html",locals())
-
-
+@login_valid
+def goods(request,goods_id):
+    goods_data = Goods.objects.filter(id=goods_id).first()
+    return render(request,"store/goods.html",locals())
+@login_valid
+def update_goods(request,goods_id):
+    goods_data = Goods.objects.filter(id=goods_id).first()
+    if request.method == "POST":
+        goods_name = request.POST.get("goods_name")
+        goods_description = request.POST.get("goods_description")
+        goods_number = request.POST.get("goods_number")
+        goods_price = request.POST.get("goods_price")
+        goods_date = request.POST.get("goods_date")
+        goods_image = request.FILES.get("goods_image")
+        goods_safeDate = request.POST.get("goods_safeDate")
+        goods = Goods.objects.get(id=int(goods_id))
+        goods.goods_name = goods_name
+        goods.goods_description = goods_description
+        goods.goods_number = goods_number
+        goods.goods_price = goods_price
+        goods.goods_date = goods_date
+        goods.goods_safeDate = goods_safeDate
+        if goods_image:
+            goods.goods_image = goods_image
+        goods.save()
+        return HttpResponseRedirect("/Store/goods/%s"%goods_id)
+    return render(request,"store/update_goods.html",locals())
+def set_goods(request,state):
+    if state == "up":
+        state_num = 1
+    else:
+        state_num = 0
+    id = request.GET.get("id")
+    referer = request.META.get("HTTP_REFERER")
+    if id:
+        goods=Goods.objects.filter(id=id).first()
+        if state == "del":
+            goods.delete()
+        else:
+            goods.goods_under = state_num
+            goods.save()
+    return HttpResponseRedirect(referer)
+def logout(request):
+    response = HttpResponseRedirect("/Store/login")
+    for key in request.COOKIES.keys():
+        response.delete_cookie(key)
+    return response
 

@@ -25,7 +25,7 @@
 
   <!-- Page Wrapper -->
   <div id="wrapper">
-
+    {% if request.COOKIES.has_store %}
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -42,21 +42,12 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item">
-        {% if is_store %}
+
         <a class="nav-link" href="index.html">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>店铺管理</span>
         </a>
-        {% else %}
-        <a class="nav-link" href="/Store/register_store/">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>没有店铺，注册一个</span>
-        </a>
-        {% endif %}
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
+         <hr class="sidebar-divider">
 
       <!-- Heading -->
       <div class="sidebar-heading">
@@ -73,14 +64,41 @@
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">商品管理:</h6>
             <a class="collapse-item" href="/Store/add_goods/">添加商品</a>
-            <a class="collapse-item" href="/Store/list_goods/">商品列表</a>
-            <a class="collapse-item" href="cards.html">商品详情</a>
+            <a class="collapse-item" href="/Store/list_goods/up/">在售商品列表</a>
+            <a class="collapse-item" href="/Store/list_goods/down/">下架商品列表</a>
           </div>
         </div>
       </li>
     </ul>
-    <!-- End of Sidebar -->
+    {% else %}
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
+      <!-- Sidebar - Brand -->
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+        <div class="sidebar-brand-icon rotate-n-15">
+          <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">电商管理平台</div>
+      </a>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0">
+
+      <!-- Nav Item - Dashboard -->
+       <li class="nav-item">
+        <a class="nav-link" href="/Store/register_store/">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>没有店铺，注册一个</span>
+        </a>
+
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider">
+      <!-- Heading -->
+    </ul>
+    <!-- End of Sidebar -->
+    {% endif %}
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
 
@@ -314,10 +332,10 @@
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-body">选择退出，如果你确定离开此界面。</div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-          <a class="btn btn-primary" href="login.html">Logout</a>
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+          <a class="btn btn-primary" href="/Store/logout/">退出</a>
         </div>
       </div>
     </div>
