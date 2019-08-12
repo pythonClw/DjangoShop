@@ -27,6 +27,13 @@
          <div class="form-group">
             <input class="form-control form-control-user" placeholder="保质期(月)" type="text" name="goods_safeDate">
         </div>
+         <div class="form-group">
+             <select name="goods_type" class="form-control form-control-user" >
+                {% for goods_type in goods_type_list %}
+                <option value="{{ goods_type.id }}">{{ goods_type.goodsType_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <div class="form-group">
             <input class="form-control form-control-user" placeholder="商品图片" type="file" name="goods_image">
         </div>
@@ -34,7 +41,7 @@
             <input class="form-control form-control-user"  type="hidden" name="goods_store" value="{{ request.COOKIES.has_store}}">
         </div>
         <div>
-            <input class="btn btn-primary btn-block" type="submit" value="添加">
+            <a href="/Store/list_goods/up"><input class="btn btn-primary btn-block" type="submit" value="添加"></a>
         </div>
 
     </form>

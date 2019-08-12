@@ -77,16 +77,6 @@ def login_valid(fun):
     return inner
 @login_valid
 def index(request):
-    # user_id = request.COOKIES.get("user_id")
-    # if user_id:
-    # user_id = int(user_id)
-    # else:
-    #     user_id = 0
-    # store = Store.objects.filter(user_id=user_id).first()
-    # if store:
-    #     is_store = 1
-    # else:
-    #     is_store = 0
     return render(request,"store/index.html")
 def base(request):
     return render(request,"store/base.html")
@@ -125,6 +115,7 @@ def register_store(request):
     return render(request, "store/register_store.html", locals())
 @login_valid
 def add_goods(request):
+    goods_type_list = GoodsType.objects.all()
     if request.method == "POST":
         goods_name = request.POST.get("goods_name")
         goods_description = request.POST.get("goods_description")
@@ -134,6 +125,7 @@ def add_goods(request):
         goods_image = request.FILES.get("goods_image")
         goods_safeDate = request.POST.get("goods_safeDate")
         goods_store = request.COOKIES.get("has_store")
+        goods_type = request.POST.get("goods_type")
         goods = Goods()
         goods.goods_name = goods_name
         goods.goods_description = goods_description
@@ -142,15 +134,17 @@ def add_goods(request):
         goods.goods_date = goods_date
         goods.goods_image = goods_image
         goods.goods_safeDate = goods_safeDate
+        goods.goods_type = GoodsType.objects.get(id=int(goods_type))
         goods.save()
         goods.store_id.add(
             Store.objects.get(id=int(goods_store))
         )
         goods.save()
-        return HttpResponseRedirect("/Store/list_goods/")
-    return render(request,"store/add_goods.html")
+        return HttpResponseRedirect("/Store/list_goods/up")
+    return render(request,"store/add_goods.html",locals())
 @login_valid
 def list_goods(request,state):
+
     if state =="up":
         state_num = 1
     else:
@@ -163,6 +157,8 @@ def list_goods(request,state):
         goods_list = store.goods_set.filter(goods_name__contains=keywords,goods_under=state_num)
     else:
         goods_list = store.goods_set.filter(goods_under=state_num)
+    goods_type = GoodsType.objects.all()
+
     paginator = Paginator(goods_list,5)
     page = paginator.page(int(page_num))
     page_range = paginator.page_range
@@ -214,4 +210,27 @@ def logout(request):
     for key in request.COOKIES.keys():
         response.delete_cookie(key)
     return response
+def add_type(request):
+    if request.method == "POST":
+        type_name = request.POST.get("goodsType_name")
+        type_description = request.POST.get("goodsType_description")
+        type_image = request.FILES.get("goodsType_image")
+        goods_type = GoodsType()
+        goods_type.goodsType_name = type_name
+        goods_type.goodsType_description = type_description
+        goods_type.goodsType_image = type_image
+        goods_type.save()
+        return HttpResponseRedirect("/Store/add_type/")
+    return render(request,"store/goods_type.html")
+from rest_framework import viewsets
 
+from Store.serializers import *
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = Goods.objects.all().order_by("id")
+    serializer_class = UserSerializer
+
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = GoodsType.objects.all()
+    serializer_class = GoodsTypeSerializer
+def ajax_goods_list(request):
+    return render(request,"store/ajax_goods_list.html")

@@ -12,6 +12,7 @@
             <tr>
                <th>商品名称</th>
                <th>商品价格(元)</th>
+               <th>商品类型</th>
                <th>商品库存数量</th>
                <th>出厂日期</th>
                <th>保质期(月)</th>
@@ -23,8 +24,9 @@
                 <tr>
                     <td><a href="/Store/goods/{{ goods.id }}">{{ goods.goods_name }}</a></td>
                     <td>
-                        <input type="text" value="{{ goods.goods_price }}">
+                        {{ goods.goods_price }}
                     </td>
+                    <td>{{ goods.goods_type }}</td>
                     <td>{{ goods.goods_number }}</td>
                     <td>{{ goods.goods_date }}</td>
                     <td>{{ goods.goods_safeDate }}</td>
